@@ -53,10 +53,9 @@ public class FlutterSimCountryCodePlugin implements FlutterPlugin, MethodCallHan
   }
 
   @Override
-  null) {
-      mChannel.setMethodCallHandler(null);
-      mChannel = null;
-    }
+  public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+    mChannel.setMethodCallHandler(null);
+    mChannel = null;
     mContext = null;
   }
 }
