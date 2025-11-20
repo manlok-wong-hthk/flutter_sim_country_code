@@ -11,7 +11,6 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /** FlutterSimCountryCodePlugin */
 public class FlutterSimCountryCodePlugin implements FlutterPlugin, MethodCallHandler {
@@ -21,10 +20,9 @@ public class FlutterSimCountryCodePlugin implements FlutterPlugin, MethodCallHan
   private MethodChannel mChannel;
   private Context mContext;
 
-  /** Plugin registration. */
-  public static void registerWith(Registrar registrar) {
-    final FlutterSimCountryCodePlugin plugin = new FlutterSimCountryCodePlugin();
-    plugin.initInstance(registrar.messenger(), registrar.context());
+  @Override
+  public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
+    initInstance(binding.getBinaryMessenger(), binding.getApplicationContext());
   }
 
   private void initInstance(BinaryMessenger messenger, Context context) {
@@ -35,8 +33,7 @@ public class FlutterSimCountryCodePlugin implements FlutterPlugin, MethodCallHan
 
   @Override
   public void onMethodCall(MethodCall call, @NonNull Result result) {
-
-    if (call.method.equals("getSimCountryCode")) {
+    if ("getSimCountryCode".equals(call.method)) {
       getSimCountryCode(result);
     } else {
       result.notImplemented();
@@ -44,26 +41,22 @@ public class FlutterSimCountryCodePlugin implements FlutterPlugin, MethodCallHan
   }
 
   private void getSimCountryCode(Result result) {
-     TelephonyManager manager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-     if (manager != null) {
-       String countryId = manager.getSimCountryIso();
-       if (countryId != null) {
-         result.success(countryId.toUpperCase());
-         return;
-       }
-     }
-     result.error("SIM_COUNTRY_CODE_ERROR", null, null);
+    TelephonyManager manager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+    if (manager != null) {
+      String countryId = manager.getSimCountryIso();
+      if (countryId != null && !countryId.isEmpty()) {
+        result.success(countryId.toUpperCase());
+        return;
+      }
+    }
+    result.error("SIM_COUNTRY_CODE_ERROR", "Unable to retrieve SIM country code", null);
   }
 
   @Override
-  public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
-    initInstance(binding.getBinaryMessenger(), binding.getApplicationContext());
-  }
-
-  @Override
-  public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-    mChannel.setMethodCallHandler(null);
-    mChannel = null;
+  null) {
+      mChannel.setMethodCallHandler(null);
+      mChannel = null;
+    }
     mContext = null;
   }
 }
